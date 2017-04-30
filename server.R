@@ -1,72 +1,95 @@
 
 
 library(shiny)
-library(plotly)
 
 shinyServer(function(input, output) {
       
-      output$infCurvePlot <- renderPlotly({
-            
-            if(length(input$height) == 0) {
-                  print("Please enter a height")
-            } else {
-            
-            zScore <- (input$height * input$unit$value - 
-                             infTable[sex==input$sex & age==input$age,]$mean)/
-                             infTable[sex==input$sex & age==input$age,]$sd
-            
+      output$infCurvePlot <- renderPlot({
+                      
+            converter <- ifelse(input$unit1=="cm", 1, 2.54)
+                      
+            zScore <- (as.numeric(input$height1) * converter - 
+                 infTable[infTable$sex==input$sex1 & 
+                              infTable$age==as.numeric(input$age1),]$mean)/
+                 infTable[infTable$sex==input$sex1 & 
+                              infTable$age==as.numeric(input$age1),]$sd
+                      
             infTable$y <- (zScore * infTable$sd) + infTable$mean
-            
-            ggplot(infTable, aes(x = age, y = y / input$unit$value)) +
+                      
+            ggplot(infTable[infTable$sex==input$sex1,], 
+                   aes(x = age, y = y / converter)) +
                   geom_point(color = "chartreuse") +
-                  geom_smooth(color = "chartreuse") +
-                  geom_point(x = input$height, color = "green") +
                   labs(title = "Infant Predicted Height by Age",
                        subtitle = "0 to 36 months",
                        x = "Age (in months)",
-                       y = paste0("Predicted Height (in", input$unit$text, ")")
+                       y = paste0("Predicted Height (in ", input$unit1, ")")
                   )
-            
-            }
             
             
       })
       
       output$infText <- renderText({
-            paste("The child's predicted height at 36 months is", 
-                  infTable[sex==input$sex & age == 36,]$mean)
+          converter <- ifelse(input$unit1=="cm", 1, 2.54)
+          
+          zScore <- (as.numeric(input$height1) * converter - 
+                         infTable[infTable$sex==input$sex1 & 
+                                      infTable$age==as.numeric(input$age1),]$mean)/
+              infTable[infTable$sex==input$sex1 & 
+                           infTable$age==as.numeric(input$age1),]$sd
+          
+          paste(round(
+              (zScore * infTable[infTable$sex==input$sex1 & infTable$age == 36,]$sd +
+                    infTable[infTable$sex==input$sex1 & infTable$age == 36,]$mean)/
+                    converter, 3),
+              input$unit1
+          )
       })
       
-      output$childCurvePlot <- renderPlotly({
-            
-            if(length(input$height) == 0) {
-                  print("Please enter a height")
-            } else {
-                  
-                  zScore <- (input$height * input$unit$value - 
-                                   childTable[sex==input$sex & age==input$age,]$mean)/
-                        childTable[sex==input$sex & age==input$age,]$sd
-                  
-                  childTable$y <- (zScore * childTable$sd) + childTable$mean
-                  
-                  ggplot(childTable, aes(x = age / 12, y = y / input$unit$value)) +
-                        geom_point(color = "chartreuse") +
-                        geom_smooth(color = "chartreuse") +
-                        geom_point(x = input$height, color = "green") +
-                        labs(title = "Child Predicted Height by Age",
-                             subtitle = "2 to 20 years",
-                             x = "Age (in years)",
-                             y = paste0("Predicted Height (in", input$unit$text, ")")
-                        )
-                  
-            }
-            
-            
+      output$childCurvePlot <- renderPlot({
+          
+          converter <- ifelse(input$unit2=="cm", 1, 2.54)
+          
+          childAge <- as.numeric(input$yrs2) * 12 + as.numeric(input$mos2)
+          
+          zScore <- (as.numeric(input$height2) * converter - 
+                         childTable[childTable$sex==input$sex2 & 
+                                      childTable$age==childAge,]$mean)/
+              childTable[childTable$sex==input$sex2 & 
+                           childTable$age==childAge,]$sd
+          
+          childTable$y <- (zScore * childTable$sd) + childTable$mean
+          
+          ggplot(childTable[childTable$sex==input$sex1,], 
+                 aes(x = age / 12, y = y / converter)) +
+              geom_point(color = "chartreuse") +
+              labs(title = "Child Predicted Height by Age",
+                   subtitle = "2 to 20 years",
+                   x = "Age (in years)",
+                   y = paste0("Predicted Height (in ", input$unit2, ")")
+              )
+          
+          
       })
       
       output$childText <- renderText({
-            paste("The child's predicted height at 20 years is", 
-                  infTable[sex==input$sex & age == 240,]$mean)
+          converter <- ifelse(input$unit2=="cm", 1, 2.54)
+          
+          childAge <- as.numeric(input$yrs2) * 12 + as.numeric(input$mos2)
+          
+          zScore <- (as.numeric(input$height2) * converter - 
+                         childTable[childTable$sex==input$sex2 & 
+                                        childTable$age==childAge,]$mean)/
+              childTable[childTable$sex==input$sex2 & 
+                             childTable$age==childAge,]$sd
+          
+          paste(round(
+              (zScore * childTable[childTable$sex==input$sex2 & 
+                                       childTable$age == 240,]$sd +
+                   childTable[childTable$sex==input$sex2 & 
+                                  childTable$age == 240,]$mean)/
+                  converter, 3),
+              input$unit2
+          )
       })
   
 })
