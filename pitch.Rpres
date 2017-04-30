@@ -1,0 +1,65 @@
+Child Height Predictor App
+========================================================
+author: Joseph Scheidt
+date: April 30, 2017
+autosize: true
+
+Summary
+========================================================
+
+Most parents are interested in how tall their children will grow up to be, given their current age and height. This app is a simple prediction mechanism, based on data on US children from the Centers for Disease Control, that will show how a given child's height is likely to change as they age, and will give a prediction as to how tall an infant will be at 3 years of age, or how tall a child will be at 20 years of age.
+
+Input
+========================================================
+
+This app has two tabs: one for the infant height predictor (0 to 36 months) and one for the child height predictor (2 to 20 years). The app then takes several inputs:
+
+- Gender (Male or Female)
+- Height (can be in cm or inches)
+- Age (when height was recorded)
+
+Calculations
+========================================================
+
+After submitting the input, the app calculates the z score for that input, using CDC data of mean and sd heights at each half-month age, to plot a predicted aging curve for the child's height, and calculate the predicted height at 36 months or 20 years. The code for this calculation is shown below:
+
+```{r codeChunk, eval=FALSE}
+converter <- ifelse(input$unit1=="cm", 1, 2.54)
+                      
+zScore <- (as.numeric(input$height1) * converter - 
+        infTable[infTable$sex==input$sex1 & 
+                  infTable$age==as.numeric(input$age1),]$mean)/
+        infTable[infTable$sex==input$sex1 & 
+                  infTable$age==as.numeric(input$age1),]$sd
+```
+
+Output
+========================================================
+
+A sample plot of a male infant with average height is shown below:
+
+```{r plot, echo=FALSE, messages = FALSE}
+library(ggplot2)
+library(dplyr)
+
+infURL <- "https://www.cdc.gov/growthcharts/data/zscore/zlenageinf.csv"
+download.file(infURL, "inf.csv")
+infTable <- read.csv("inf.csv", stringsAsFactors = FALSE)
+infTable <- infTable[-74,]
+infTable$Sex <- factor(infTable$Sex, labels = c("Male", "Female"))
+infTable$Agemos <- as.numeric(infTable$Agemos)
+infTable <- mutate(infTable, sd = (X1 - X.1)/2, mean = X0) %>%
+      rename(age = Agemos, sex = Sex) %>%
+      select(sex, age, mean, sd)
+
+ggplot(infTable[infTable$sex=="Male",], 
+                   aes(x = age, y = mean)) +
+                  geom_point(color = "chartreuse") +
+                  labs(title = "Infant Predicted Height by Age",
+                       subtitle = "0 to 36 months",
+                       x = "Age (in months)",
+                       y = paste0("Predicted Height (in cm)")
+                  )
+```
+
+Thanks!
