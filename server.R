@@ -60,7 +60,7 @@ shinyServer(function(input, output) {
           
           childTable$y <- (zScore * childTable$sd) + childTable$mean
           
-          ggplot(childTable[childTable$sex==input$sex1,], 
+          ggplot(childTable[childTable$sex==input$sex2,], 
                  aes(x = age / 12, y = y / converter)) +
               geom_point(color = "chartreuse") +
               labs(title = "Child Predicted Height by Age",
