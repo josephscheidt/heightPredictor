@@ -70,6 +70,9 @@ shinyUI(fluidPage(
                                textOutput("childText")
                            )
                        ))
-      
-  )
+  
+  ),
+  
+  h4("Need help? Instructions available", 
+     a("here", href="https://github.com/josephscheidt/heightPredictor/blob/gh-pages/README.md"))
 ))
