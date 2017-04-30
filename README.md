@@ -1,18 +1,21 @@
 # heightPredictor
 shiny app for predicting child height aging curves
 
-##Height prediction data
+## Height prediction data
 
 The data used for this app come from the Centers for Disease Control, and consist of averages of childrens' heights in the United States for each half month age interval.
 
 More information can be found here:
+
 https://www.cdc.gov/growthcharts/
 
 The data files used can be downloaded from these links:
+
 https://www.cdc.gov/growthcharts/data/zscore/zlenageinf.csv
+
 https://www.cdc.gov/growthcharts/data/zscore/zstatage.csv
 
-##Using the app
+## Using the app
 
 To use the app, click on the tab you are interested in for prediction: either the 0 to 36 month infant height predictor or the 2 to 20 year child height predictor.
 
